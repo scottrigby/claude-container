@@ -6,7 +6,7 @@
 set -e
 
 # Set path to the devcontainer directory
-DEVCONTAINER_DIR="$HOME/code/github.com/anthropics/claude-code/.devcontainer"
+CONTAINER_RAW_DIR="https://raw.githubusercontent.com/anthropics/claude-code/refs/heads/main/.devcontainer"
 
 # Ensure local claude directories exist
 function ensure_claude_dir {
@@ -75,7 +75,10 @@ case $command in
     build)
         echo "Building container image..."
         echo "Using timezone: $TIMEZONE"
-        podman build -t claude-code --build-arg TD="$TIMEZONE" "$DEVCONTAINER_DIR"
+        TEMP_DIR=$(mktemp -d)
+        curl -s $CONTAINER_RAW_DIR/Dockerfile -o $TEMP_DIR/Dockerfile
+        curl -s $CONTAINER_RAW_DIR/init-firewall.sh -o $TEMP_DIR/init-firewall.sh
+        podman build -t claude-code --build-arg TD="$TIMEZONE" $TEMP_DIR
         ;;
     start)
         echo "Starting container..."
