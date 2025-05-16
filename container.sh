@@ -85,7 +85,9 @@ case $command in
     run)
         echo "Running interactive container..."
         ensure_claude_dir
-        run_container "interactive" "" "zsh"
+
+        [ $# -eq 0 ] && CMD=claude || CMD="$@"
+        run_container "interactive" "" "$CMD"
         ;;
     exec)
         echo "Executing in container..."
