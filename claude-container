@@ -44,15 +44,15 @@ function run_container {
 }
 
 function usage {
-    echo "Usage: $0 [build|start|run|exec|stop] [options]"
+    echo "Usage: $0 [build|start|run|exec|stop|help] [options]"
     echo ""
     echo "Commands:"
     echo "  build       Build the container image"
     echo "  start       Start a detached container"
-    echo "  run         Run an interactive container that removes itself on exit"
+    echo "  run         Run an interactive container that removes itself on exit (default command: claude)"
     echo "  exec        Execute a command in a running container (default: zsh)"
     echo "  stop        Stop a running container"
-    exit 1
+    echo "  help        Displays help"
 }
 
 # Generate container instance name based on parent and current directory
@@ -103,8 +103,12 @@ case $command in
         echo "Stopping container..."
         podman stop "$CONTAINER_NAME"
         ;;
+    help)
+        usage
+        ;;
     *)
         echo "Error: Unknown command '$command'"
         usage
+        exit 1
         ;;
 esac
