@@ -11,8 +11,8 @@ CONTAINER_RAW_DIR="https://raw.githubusercontent.com/anthropics/claude-code/refs
 # Ensure local claude directories exist
 function ensure_claude_dir {
     echo "Creating claude directories..."
-    mkdir -p ./claude/config
-    mkdir -p ./claude/commandhistory
+    mkdir -p .claude
+    touch .claude/.bash_history
 }
 
 # Function to run container with common options
@@ -30,8 +30,8 @@ function run_container {
 
     # Common volume mounts
     local volumes=(
-        "-v $(pwd)/claude/config:/home/node/.claude"
-        "-v $(pwd)/claude/commandhistory:/commandhistory"
+        "-v $(pwd)/.claude:/home/node/.claude"
+        "-v $(pwd)/.claude/.bash_history:/commandhistory/.bash_history"
         "-v $(pwd):/workspace"
     )
 
@@ -58,7 +58,7 @@ function usage {
 # Generate container instance name based on parent and current directory
 PARENT_DIR=$(basename "$(dirname "$(pwd)")" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
 CURRENT_DIR=$(basename "$(pwd)" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9]/-/g')
-CONTAINER_NAME="${PARENT_DIR}-${CURRENT_DIR}"
+CONTAINER_NAME=${CONTAINER_NAME:-"${PARENT_DIR}-${CURRENT_DIR}"}
 
 # Get current timezone in IANA format (e.g. "America/New_York")
 TIMEZONE=$(readlink /etc/localtime | sed 's/.*zoneinfo\///')
