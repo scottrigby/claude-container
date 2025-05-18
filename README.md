@@ -5,7 +5,7 @@ A simple container script for running Claude CLI.
 ## Installation
 
 1. Clone this repository
-2. Install script
+2. Install
 
     ```bash
     # Add alias to your shell config
