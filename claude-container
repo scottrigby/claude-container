@@ -50,15 +50,20 @@ function run_container {
 }
 
 function usage {
-    echo "Usage: $0 [build|start|run|exec|stop|help] [options]"
+    echo "Usage: $0 [run|help|build|start|exec|stop|rm] [options]"
     echo ""
-    echo "Commands:"
-    echo "  build       Build the container image"
-    echo "  start       Start a detached container"
+    echo "Run from within a project directory"
+    echo ""
+    echo "Simple Commands:"
     echo "  run         Run an interactive container that removes itself on exit (default command: claude)"
+    echo "  help        Displays help"
+    echo ""
+    echo "More Commands:"
+    echo "  build       Build the container image"
+    echo "  start       Start a detached container (optional env var CONTAINER_NAME. default: parent-dir/current-dir)"
     echo "  exec        Execute a command in a running container (default: zsh)"
     echo "  stop        Stop a running container"
-    echo "  help        Displays help"
+    echo "  rm          Remove a stopped container"
 }
 
 # Generate container instance name based on parent and current directory
@@ -78,6 +83,13 @@ command=$1
 shift
 
 case $command in
+    run)
+        echo "Running interactive container..."
+        ensure_claude_dir
+
+        [ $# -eq 0 ] && CMD=claude || CMD="$@"
+        run_container "interactive" "" "$CMD"
+        ;;
     build)
         echo "Building container image..."
         echo "Using timezone: $TIMEZONE"
@@ -90,13 +102,6 @@ case $command in
         echo "Starting container..."
         ensure_claude_dir
         run_container "detached" "$CONTAINER_NAME"
-        ;;
-    run)
-        echo "Running interactive container..."
-        ensure_claude_dir
-
-        [ $# -eq 0 ] && CMD=claude || CMD="$@"
-        run_container "interactive" "" "$CMD"
         ;;
     exec)
         echo "Executing in container..."
@@ -111,6 +116,10 @@ case $command in
     stop)
         echo "Stopping container..."
         podman stop "$CONTAINER_NAME"
+        ;;
+    rm)
+        echo "Removing container..."
+        podman rm "$CONTAINER_NAME"
         ;;
     help)
         usage

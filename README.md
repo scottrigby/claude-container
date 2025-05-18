@@ -5,24 +5,33 @@ A simple container script for running Claude CLI.
 ## Installation
 
 1. Clone this repository
-2. Add alias to your shell config:
+2. Install script
 
     ```bash
+    # Add alias to your shell config
     alias claude-container=$(pwd)/claude-container
+
+    # Or add to bin
+    sudo cp claude-container /usr/local/bin
     ```
 
 ## Usage
 
-```bash
-Usage: claude-container [build|start|run|exec|stop|help] [options]
+```text
+Usage: claude-container [run|help|build|start|exec|stop|rm] [options]
 
-Commands:
+Run from within a project directory
+
+Simple Commands:
+  run         Run an interactive container that removes itself on exit (default command: claude)
+  help        Displays help
+
+More Commands:
   build       Build the container image
   start       Start a detached container (optional env var CONTAINER_NAME. default: parent-dir/current-dir)
-  run         Run an interactive container that removes itself on exit (default command: claude)
   exec        Execute a command in a running container (default: zsh)
   stop        Stop a running container
-  help        Displays help
+  rm          Remove a stopped container
 ```
 
 ## Notes
