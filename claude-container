@@ -35,11 +35,17 @@ function run_container {
         "-v $(pwd):/workspace"
     )
 
+    # Common local args
+    local args=(
+        "--cap-add=NET_ADMIN"
+        "--cap-add=NET_RAW"
+    )
+
     # Build the command based on mode
     if [ "$mode" = "detached" ]; then
-        podman run -dit --name "$container_name" ${env_vars[@]} ${volumes[@]} claude-code
+        podman run -dit --name "$container_name" ${env_vars[@]} ${volumes[@]} ${args[@]} claude-code
     else
-        podman run --rm -it ${env_vars[@]} ${volumes[@]} claude-code ${cmd}
+        podman run --rm -it ${env_vars[@]} ${volumes[@]} ${args[@]} claude-code ${cmd}
     fi
 }
 
