@@ -1,6 +1,13 @@
 # Claude Container
 
-A simple container script for running Claude CLI.
+Runs [Claude Code (Research Preview)](https://docs.anthropic.com/en/docs/claude-code/overview) in a container sandbox, allowing Claude secure read/write access for only the current directory.
+
+- Leverages the Claude Code [Dev Container](https://github.com/anthropics/claude-code/) reference implementation
+- Uses the same container settings as the VSCode extension, without needing to run VSCode or the extension
+
+## Prerequisites
+
+- [Podman CLI](https://podman.io/)
 
 ## Installation
 
@@ -32,6 +39,9 @@ More Commands:
   exec        Execute a command in a running container (default: zsh)
   stop        Stop a running container
   rm          Remove a stopped container
+
+  Examples:
+  - Safe YOLO mode: `claude-container run claude --dangerously-skip-permissions`
 ```
 
 ## Notes

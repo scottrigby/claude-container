@@ -50,7 +50,7 @@ function run_container {
 }
 
 function usage {
-    echo "Usage: $0 [run|help|build|start|exec|stop|rm] [options]"
+    echo "Usage: claude-container [run|help|build|start|exec|stop|rm] [options]"
     echo ""
     echo "Run from within a project directory"
     echo ""
@@ -64,6 +64,10 @@ function usage {
     echo "  exec        Execute a command in a running container (default: zsh)"
     echo "  stop        Stop a running container"
     echo "  rm          Remove a stopped container"
+    echo ""
+    echo "Examples:"
+    echo "  - Safe YOLO mode: \`claude-container run claude --dangerously-skip-permissions\`"
+    echo ""
 }
 
 # Generate container instance name based on parent and current directory
