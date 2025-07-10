@@ -4,6 +4,7 @@
 # Supports: build, start, run, exec, stop
 
 set -e
+trap 'echo "Error at line $LINENO"; exit 1' ERR
 
 # Set path to the devcontainer directory
 CONTAINER_RAW_DIR="https://raw.githubusercontent.com/anthropics/claude-code/refs/heads/main/.devcontainer"
@@ -13,6 +14,14 @@ function ensure_claude_dir {
     echo "Creating claude directories..."
     mkdir -p .claude
     touch .claude/.bash_history
+}
+
+function build_container() {
+    echo "Using timezone: $TIMEZONE"
+    TEMP_DIR=$(mktemp -d)
+    curl -s $CONTAINER_RAW_DIR/Dockerfile -o $TEMP_DIR/Dockerfile
+    curl -s $CONTAINER_RAW_DIR/init-firewall.sh -o $TEMP_DIR/init-firewall.sh
+    podman build -t claude-code --build-arg TD="$TIMEZONE" $TEMP_DIR
 }
 
 # Function to run container with common options
@@ -90,17 +99,14 @@ case $command in
     run)
         echo "Running interactive container..."
         ensure_claude_dir
+        build_container
 
         [ $# -eq 0 ] && CMD=claude || CMD="$@"
         run_container "interactive" "" "$CMD"
         ;;
     build)
         echo "Building container image..."
-        echo "Using timezone: $TIMEZONE"
-        TEMP_DIR=$(mktemp -d)
-        curl -s $CONTAINER_RAW_DIR/Dockerfile -o $TEMP_DIR/Dockerfile
-        curl -s $CONTAINER_RAW_DIR/init-firewall.sh -o $TEMP_DIR/init-firewall.sh
-        podman build -t claude-code --build-arg TD="$TIMEZONE" $TEMP_DIR
+        build_container
         ;;
     start)
         echo "Starting container..."
