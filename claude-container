@@ -65,8 +65,36 @@ function run_container {
     fi
 }
 
+function listener() {
+    PORT=${1:-8080}
+
+    echo "Starting listener on port $PORT..."
+    echo "Press Ctrl+C to stop"
+    echo ""
+
+    while true; do
+        echo "$(date): Listening on port $PORT..."
+
+        # Listen, capture message, and send response back (closes connection immediately)
+        nc -l $PORT | (
+            read RECEIVED_MESSAGE
+            echo "received"  # This goes back to the client, closing the connection
+
+            if [ -n "$RECEIVED_MESSAGE" ]; then
+                echo "$(date): Received message: '$RECEIVED_MESSAGE'" >&2
+                echo "$(date): Saying: '$RECEIVED_MESSAGE'" >&2
+                say "$RECEIVED_MESSAGE" &
+            else
+                echo "$(date): Empty message received - saying default" >&2
+                say "hello" &
+            fi
+        )
+        echo ""
+    done
+}
+
 function usage {
-    echo "Usage: claude-container [run|help|build|start|exec|stop|rm] [options]"
+    echo "Usage: claude-container [run|help|build|start|exec|stop|rm|run-withgo|build-withgo|listener] [options]"
     echo ""
     echo "Run from within a project directory"
     echo ""
@@ -81,9 +109,21 @@ function usage {
     echo "  stop        Stop a running container"
     echo "  rm          Remove a stopped container"
     echo ""
+    echo "Custom Container Commands"
+    echo "  run-withgo    Run an interactive container with Go tools"
+    echo "  build-withgo  Build an interactive container with Go tools"
+    echo "  listener      Start a notification listener for Claude (optional port. default: 8080. Ctrl-C to stop)"
+    echo ""
     echo "Examples:"
     echo "  - Safe YOLO mode: \`claude-container run claude --dangerously-skip-permissions\`"
     echo "  - With Go: \`claude-container run-withgo claude --dangerously-skip-permissions\`"
+    echo ""
+    echo "For audio notifications, add this to your CLAUDE.md:"
+    echo "  **Task Completion**:"
+    echo "  - Send audio notification: \`notify.sh "completion message"\`"
+    echo ""
+    echo "  **Clarification and Communication**:"
+    echo "  - Send notification when clarification needed: \`notify.sh "Need clarification: reason"\`"
     echo ""
 }
 
@@ -113,7 +153,7 @@ case $command in
         run_container "interactive" "" "$CMD"
         ;;
     run-withgo)
-        echo "Running interactive container withgo..."
+        echo "Running interactive container with Go tools..."
         ensure_claude_dir
         build_container_withgo
 
@@ -125,7 +165,7 @@ case $command in
         build_container
         ;;
     build-withgo)
-        echo "Building container image with Go..."
+        echo "Building container image with Go tools..."
         build_container_withgo
         ;;
     start)
@@ -150,6 +190,9 @@ case $command in
     rm)
         echo "Removing container..."
         podman rm "$CONTAINER_NAME"
+        ;;
+    listener)
+        listener "$@"
         ;;
     help)
         usage

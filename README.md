@@ -25,7 +25,7 @@ Runs [Claude Code (Research Preview)](https://docs.anthropic.com/en/docs/claude-
 ## Usage
 
 ```text
-Usage: claude-container [run|help|build|start|exec|stop|rm] [options]
+Usage: claude-container [run|help|build|start|exec|stop|rm|run-withgo|build-withgo|listener] [options]
 
 Run from within a project directory
 
@@ -40,8 +40,21 @@ More Commands:
   stop        Stop a running container
   rm          Remove a stopped container
 
-  Examples:
+Custom Container Commands
+  run-withgo    Run an interactive container with Go tools
+  build-withgo  Build an interactive container with Go tools
+  listener      Start a notification listener for Claude (optional port. default: 8080. Ctrl-C to stop)
+
+Examples:
   - Safe YOLO mode: `claude-container run claude --dangerously-skip-permissions`
+  - With Go: `claude-container run-withgo claude --dangerously-skip-permissions`
+
+For audio notifications, add this to your CLAUDE.md:
+  **Task Completion**:
+  - Send audio notification: `notify.sh completion message`
+
+  **Clarification and Communication**:
+  - Send notification when clarification needed: `notify.sh Need clarification: reason`
 ```
 
 ## Notes
