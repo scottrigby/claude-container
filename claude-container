@@ -24,11 +24,18 @@ function build_container() {
     podman build -t claude-code --build-arg TD="$TIMEZONE" $TEMP_DIR
 }
 
+function build_container_withgo() {
+    echo "Using timezone: $TIMEZONE"
+    local dir=~/code/github.com/scottrigby/claude-container/withgo
+    podman build -t claude-code-go --build-arg TD="$TIMEZONE" $dir
+}
+
 # Function to run container with common options
 function run_container {
     local mode=$1          # "detached" or "interactive"
     local container_name=$2 # Only used in detached mode
     local cmd=${3:-""}      # Command to run (optional, only used in interactive mode)
+    local container_image=${4:-claude-code} # default to claude-code
 
     # Common environment variables
     local env_vars=(
@@ -52,9 +59,9 @@ function run_container {
 
     # Build the command based on mode
     if [ "$mode" = "detached" ]; then
-        podman run -dit --name "$container_name" ${env_vars[@]} ${volumes[@]} ${args[@]} claude-code
+        podman run -dit --name "$container_name" ${env_vars[@]} ${volumes[@]} ${args[@]} ${container_image}
     else
-        podman run --rm -it ${env_vars[@]} ${volumes[@]} ${args[@]} claude-code ${cmd}
+        podman run --rm -it ${env_vars[@]} ${volumes[@]} ${args[@]} ${container_image} ${cmd}
     fi
 }
 
@@ -76,6 +83,7 @@ function usage {
     echo ""
     echo "Examples:"
     echo "  - Safe YOLO mode: \`claude-container run claude --dangerously-skip-permissions\`"
+    echo "  - With Go: \`claude-container run-withgo claude --dangerously-skip-permissions\`"
     echo ""
 }
 
@@ -88,8 +96,8 @@ CONTAINER_NAME=${CONTAINER_NAME:-"${PARENT_DIR}-${CURRENT_DIR}"}
 TIMEZONE=$(readlink /etc/localtime | sed 's/.*zoneinfo\///')
 
 # Check if at least one argument is provided
-if [ $# -lt 1 ]; then
-    usage
+if [ -z "$1" ]; then
+  usage
 fi
 
 command=$1
@@ -104,9 +112,21 @@ case $command in
         [ $# -eq 0 ] && CMD=claude || CMD="$@"
         run_container "interactive" "" "$CMD"
         ;;
+    run-withgo)
+        echo "Running interactive container withgo..."
+        ensure_claude_dir
+        build_container_withgo
+
+        [ $# -eq 0 ] && CMD=claude || CMD="$@"
+        run_container "interactive" "" "$CMD" "claude-code-go"
+        ;;
     build)
         echo "Building container image..."
         build_container
+        ;;
+    build-withgo)
+        echo "Building container image with Go..."
+        build_container_withgo
         ;;
     start)
         echo "Starting container..."
