@@ -18,12 +18,12 @@ echo "Triggering listener at $HOST:$PORT with message: '$MESSAGE'"
 if command -v nc >/dev/null 2>&1; then
     # Send message and close connection immediately
     # Try different approaches depending on netcat version
+    # note WINID is set as an environment variable from the terminal window where claude-container is run
     if nc -h 2>&1 | grep -q '\-w'; then
-        # Use timeout flag if available
-        echo "$MESSAGE" | nc -w 1 $HOST $PORT
+        printf "%s\n%s\n" "$WINID" "$MESSAGE" | nc -w 1 $HOST $PORT
     else
         # Use timeout command as fallback
-        echo "$MESSAGE" | timeout 2 nc $HOST $PORT
+        printf "%s\n%s\n" "$WINID" "$MESSAGE" | timeout 2 nc $HOST $PORT
     fi
 
     if [ $? -eq 0 ]; then

@@ -38,10 +38,13 @@ function run_container {
     local container_image=${4:-claude-code} # default to claude-code
 
     # Common environment variables
+    # Get the current Terminal window ID where claude-code is running interactively, and assign to a shell variable
+    local winid=$(osascript -e 'tell application "Terminal" to id of front window')
     local env_vars=(
         "-e CLAUDE_CONFIG_DIR=/home/node/.claude"
         "-e NODE_OPTIONS=--max-old-space-size=4096"
         "-e POWERLEVEL9K_DISABLE_GITSTATUS=true"
+        "-e WINID=$winid"
     )
 
     # Common volume mounts
@@ -77,17 +80,32 @@ function listener() {
 
         # Listen, capture message, and send response back (closes connection immediately)
         nc -l $PORT | (
-            read RECEIVED_MESSAGE
+            read WINID
+            RECEIVED_MESSAGE=$(cat)
             echo "received"  # This goes back to the client, closing the connection
+            echo "WINID='$WINID'" >&2
 
+            local announcement="Claude finished"
             if [ -n "$RECEIVED_MESSAGE" ]; then
-                echo "$(date): Received message: '$RECEIVED_MESSAGE'" >&2
-                echo "$(date): Saying: '$RECEIVED_MESSAGE'" >&2
-                say "$RECEIVED_MESSAGE" &
+                local message=$RECEIVED_MESSAGE
+                echo "$(date): Received message: '$message'" >&2
+                echo "$(date): Notifying: '$message'" >&2
             else
-                echo "$(date): Empty message received - saying default" >&2
-                say "hello" &
+                local message=$announcement
+                echo "$(date): Empty message received - notifying $message" >&2
             fi
+
+            osascript -e "
+            tell application \"Terminal\"
+                set index of (first window whose id is $WINID) to 1
+                activate
+            end tell
+            set oldVolume to output volume of (get volume settings)
+            set volume output volume 60
+            say \"$announcement\"
+            set volume output volume oldVolume
+            tell app \"Terminal\" to display dialog \"$message\" with icon note buttons {\"OK\"} default button \"OK\"
+            " &
         )
         echo ""
     done
