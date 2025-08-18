@@ -153,9 +153,10 @@ CONTAINER_NAME=${CONTAINER_NAME:-"${PARENT_DIR}-${CURRENT_DIR}"}
 # Get current timezone in IANA format (e.g. "America/New_York")
 TIMEZONE=$(readlink /etc/localtime | sed 's/.*zoneinfo\///')
 
-# Check if at least one argument is provided
-if [ -z "$1" ]; then
+# Check if no arguments are provided
+if [ -z "${1:-}" ]; then
   usage
+  exit 0
 fi
 
 command=$1
