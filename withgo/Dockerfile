@@ -48,7 +48,6 @@ RUN ARCH=$(dpkg --print-architecture) && \
   sudo dpkg -i "git-delta_0.18.2_${ARCH}.deb" && \
   rm "git-delta_0.18.2_${ARCH}.deb"
 
-
 ENV GOBIN=/home/node/go/bin
 ENV PATH=$PATH:/usr/local/go/bin
 # ENV PATH=$PATH:/usr/local/go/bin:/home/node/go/bin
@@ -56,6 +55,10 @@ RUN curl -sSLO https://go.dev/dl/go1.24.3.linux-arm64.tar.gz \
   && tar -C /usr/local -xzf go1.24.3.linux-arm64.tar.gz \
   && go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.0 \
   && go install golang.org/x/tools/cmd/goimports@latest
+
+# Add whitespace tools
+RUN curl -sL https://github.com/scottrigby/whitespace-tools/releases/download/v1.0.1/whitespace-tools_1.0.1_linux_arm64.tar.gz | \
+  tar -xz -C /usr/local/bin/ newline trailingspace
 
 # Set up non-root user
 USER node
